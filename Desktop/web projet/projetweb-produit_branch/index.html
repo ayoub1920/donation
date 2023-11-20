@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<head>
+    <title>Crud Operation</title>
+    <link type="text/css" rel="stylesheet" href="style.css"
+</head>
+
+<body>
+    <table>
+        <tr>
+            <td>
+                <form autocomplete="off" onsubmit="onFormSubmit()">
+                    <div>
+                        <label for="productCode">Username</label>
+                        <input type="text" name="productCode" id="productCode">
+                    </div>
+                    <div>
+                        <label for="product">Email</label>
+                        <input type="email" name="product" id="product">
+                    </div>
+                    <div>
+                        <label for="qty">password</label>
+                        <input type="text" name="qty" id="qty">
+                    </div>
+                    <div>
+                        <label for="perPrice">password confirmation</label>
+                        <input type="text" name="perPrice" id="perPrice">
+                    </div>
+
+                    <div class="form_action--button">
+                        <input type="submit" value="Submit">
+                        <input type="reset" value="Reset">
+                    </div>
+                </form>
+
+                <td>
+                    <table class="list" id="storeList">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Password</th>
+                                <th>Password Confirmation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+                    </table>
+                </td>
+            </td>
+        </tr>
+    </table>
+    <script type="text/javascript" src="./script.js"></script>
+</body>
+</html>
