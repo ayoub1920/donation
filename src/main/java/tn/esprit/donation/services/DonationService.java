@@ -180,37 +180,37 @@ public class DonationService {
         return donationRepository.findAll();
     }
 
-    public Map<String, Object> getStats() {
+    public Map<String, Object> getStats(Long userId) {
         Map<String, Object> stats = new HashMap<>();
 
         // Total
-        stats.put("totalDonations", donationRepository.count());
-        stats.put("totalItems", donationRepository.sumTotalQuantity());
+        stats.put("totalDonations", donationRepository.countByUserId(userId));
+        stats.put("totalItems", donationRepository.sumTotalQuantityByUserId(userId));
 
         // By status
         Map<String, Long> byStatus = new HashMap<>();
         for (DonationStatus s : DonationStatus.values()) {
-            byStatus.put(s.name(), donationRepository.countByStatus(s));
+            byStatus.put(s.name(), donationRepository.countByUserIdAndStatus(userId, s));
         }
         stats.put("byStatus", byStatus);
 
         // By type
         Map<String, Long> byType = new HashMap<>();
         for (DonationType t : DonationType.values()) {
-            byType.put(t.name(), donationRepository.countByType(t));
+            byType.put(t.name(), donationRepository.countByUserIdAndType(userId, t));
         }
         stats.put("byType", byType);
 
         // Items by status
         Map<String, Long> itemsByStatus = new HashMap<>();
         for (DonationStatus s : DonationStatus.values()) {
-            itemsByStatus.put(s.name(), donationRepository.sumQuantityByStatus(s));
+            itemsByStatus.put(s.name(), donationRepository.sumQuantityByUserIdAndStatus(userId, s));
         }
         stats.put("itemsByStatus", itemsByStatus);
 
         // By month
         Map<String, Long> byMonth = new LinkedHashMap<>();
-        for (Object[] row : donationRepository.countByMonth()) {
+        for (Object[] row : donationRepository.countByMonthAndUserId(userId)) {
             byMonth.put((String) row[0], (Long) row[1]);
         }
         stats.put("byMonth", byMonth);

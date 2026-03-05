@@ -74,9 +74,9 @@ public class DonationController {
         return ResponseEntity.ok(donationService.updateStatus(id, status));
     }
 
-    @GetMapping("/stats")
-    public ResponseEntity<Map<String, Object>> getStats() {
-        return ResponseEntity.ok(donationService.getStats());
+    @GetMapping("/stats/{userId}")
+    public ResponseEntity<Map<String, Object>> getStats(@PathVariable Long userId) {
+        return ResponseEntity.ok(donationService.getStats(userId));
     }
 
     @DeleteMapping("/delete-donation/{id}")

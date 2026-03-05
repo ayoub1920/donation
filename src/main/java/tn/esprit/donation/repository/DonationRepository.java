@@ -12,19 +12,21 @@ import java.util.List;
 @Repository
 public interface DonationRepository extends JpaRepository<Donation, Long> {
 
-    long countByStatus(DonationStatus status);
+    long countByUserId(Long userId);
 
-    long countByType(DonationType type);
+    long countByUserIdAndStatus(Long userId, DonationStatus status);
 
-    @Query("SELECT COALESCE(SUM(d.quantity), 0) FROM Donation d")
-    long sumTotalQuantity();
+    long countByUserIdAndType(Long userId, DonationType type);
 
-    @Query("SELECT COALESCE(SUM(d.quantity), 0) FROM Donation d WHERE d.status = :status")
-    long sumQuantityByStatus(DonationStatus status);
+    @Query("SELECT COALESCE(SUM(d.quantity), 0) FROM Donation d WHERE d.userId = :userId")
+    long sumTotalQuantityByUserId(Long userId);
+
+    @Query("SELECT COALESCE(SUM(d.quantity), 0) FROM Donation d WHERE d.userId = :userId AND d.status = :status")
+    long sumQuantityByUserIdAndStatus(Long userId, DonationStatus status);
 
     @Query("SELECT FUNCTION('TO_CHAR', d.donatedAt, 'YYYY-MM') AS month, COUNT(d) AS count " +
-           "FROM Donation d WHERE d.donatedAt IS NOT NULL " +
+           "FROM Donation d WHERE d.userId = :userId AND d.donatedAt IS NOT NULL " +
            "GROUP BY FUNCTION('TO_CHAR', d.donatedAt, 'YYYY-MM') " +
            "ORDER BY month DESC")
-    List<Object[]> countByMonth();
+    List<Object[]> countByMonthAndUserId(Long userId);
 }
