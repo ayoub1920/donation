@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merci pour votre don !</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+        }
+        .content {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .donation-details {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #667eea;
+        }
+        .thank-you {
+            font-size: 24px;
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .footer {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-top: 30px;
+        }
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎁 Merci infiniment !</h1>
+        <p>Votre générosité fait une réelle différence</p>
+    </div>
+
+    <div class="content">
+        <div class="thank-you">
+            Merci pour votre merveilleux don !
+        </div>
+
+        <div class="donation-details">
+            <h3>📋 Détails de votre don</h3>
+            <p><strong>Article:</strong> <span th:text="${itemName}">Nom de l'article</span></p>
+            <p><strong>Quantité:</strong> <span class="highlight" th:text="${quantity}">1</span></p>
+            <p><strong>Date du don:</strong> <span th:text="${#temporals.format(donatedAt, 'dd MMMM yyyy à HH:mm')}">5 Mars 2026 à 14:30</span></p>
+        </div>
+
+        <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; margin-top: 20px;">
+            <h4>🌟 Votre impact</h4>
+            <p>Votre don va aider quelqu'un dans le besoin. Chaque geste de générosité compte énormément et contribue à rendre notre communauté meilleure.</p>
+        </div>
+
+        <div style="background: #fef3c7; padding: 15px; border-radius: 8px; margin-top: 20px;">
+            <h4>📬 Restez connecté</h4>
+            <p>Nous vous tiendrons informé de l'impact de votre don et des prochaines opportunités de contribuer.</p>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Cordialement,<br>L'équipe Minolingo</p>
+        <p style="font-size: 12px; margin-top: 10px;">
+            Cet email a été envoyé automatiquement. Merci de ne pas répondre à cet adresse.
+        </p>
+    </div>
+</body>
+</html>
