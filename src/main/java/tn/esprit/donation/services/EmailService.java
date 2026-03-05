@@ -52,4 +52,33 @@ public class EmailService {
             System.err.println("Erreur lors de l'envoi de l'email: " + e.getMessage());
         }
     }
+
+    public void sendMerciPointsEmail(Donation donation, int pointsEarned, int totalPoints) {
+        try {
+            MimeMessage message = emailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
+            String userEmail = userService.getUserEmail(donation.getUserId());
+
+            helper.setFrom("Minolingo <mino.support@minolingo.online>");
+            helper.setTo(userEmail);
+            helper.setSubject("🎉 Vous avez gagné " + pointsEarned + " points MERCI !");
+
+            Context context = new Context();
+            context.setVariable("itemName", donation.getItemName());
+            context.setVariable("quantity", donation.getQuantity());
+            context.setVariable("pointsEarned", pointsEarned);
+            context.setVariable("totalPoints", totalPoints);
+
+            String htmlContent = templateEngine.process("merci-points", context);
+
+            helper.setText(htmlContent, true);
+
+            emailSender.send(message);
+
+            System.out.println("Merci points email sent to: " + userEmail + " (" + pointsEarned + " pts)");
+        } catch (MessagingException e) {
+            System.err.println("Erreur lors de l'envoi de l'email merci points: " + e.getMessage());
+        }
+    }
 }

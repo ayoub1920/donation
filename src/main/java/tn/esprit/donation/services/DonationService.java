@@ -25,6 +25,7 @@ public class DonationService {
     private final DonationCommentRepository donationCommentRepository;
 
     private final EmailService emailService;
+    private final MerciPointService merciPointService;
 
     public Donation create(Donation donation) {
         Donation savedDonation = donationRepository.save(donation);
@@ -59,7 +60,18 @@ public class DonationService {
         Donation existing = donationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Donation not found with id: " + id));
         existing.setStatus(status);
-        return donationRepository.save(existing);
+        Donation saved = donationRepository.save(existing);
+
+        // Award MERCI points when donation is accepted
+        if (status == DonationStatus.ACCEPTED) {
+            try {
+                merciPointService.awardPoints(saved);
+            } catch (Exception e) {
+                System.err.println("Failed to award merci points: " + e.getMessage());
+            }
+        }
+
+        return saved;
     }
 
     public DonationReview reviewDonation(Long id, Long moderatorId, DonationStatus decision, String reason) {
@@ -80,6 +92,15 @@ public class DonationService {
 
         donation.setStatus(decision);
         donationRepository.save(donation);
+
+        // Award MERCI points when donation is accepted
+        if (decision == DonationStatus.ACCEPTED) {
+            try {
+                merciPointService.awardPoints(donation);
+            } catch (Exception e) {
+                System.err.println("Failed to award merci points: " + e.getMessage());
+            }
+        }
 
         DonationReview review = DonationReview.builder()
                 .donation(donation)
