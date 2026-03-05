@@ -30,7 +30,7 @@ public class EmailService {
 
             String userEmail = userService.getUserEmail(donation.getUserId());
             
-            helper.setFrom("mino.support@minolingo.online");
+            helper.setFrom("Minolingo <mino.support@minolingo.online>");
             helper.setTo(userEmail);
             helper.setSubject("Merci pour votre généreux don !");
 
@@ -44,7 +44,6 @@ public class EmailService {
             String htmlContent = templateEngine.process("donation-thank-you", context);
 
             helper.setText(htmlContent, true);
-            helper.setFrom("Minolingo <mino.support@minolingo.online>");
 
             emailSender.send(message);
             

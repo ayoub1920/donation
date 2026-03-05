@@ -11,7 +11,6 @@ import tn.esprit.donation.repository.DonationRepository;
 import tn.esprit.donation.repository.DonationReviewRepository;
 import tn.esprit.donation.repository.DonationFavoriteRepository;
 import tn.esprit.donation.repository.DonationCommentRepository;
-import tn.esprit.donation.services.EmailService;
 
 import java.util.List;
 import java.util.stream.Collectors;
