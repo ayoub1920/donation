@@ -1,4 +1,4 @@
-package tn.esprit.donation.service;
+package tn.esprit.donation.services;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;

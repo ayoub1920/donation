@@ -15,16 +15,9 @@ public class ResponseHeaderFilter implements Filter {
         try {
             chain.doFilter(request, response);
         } finally {
-
-            if (response instanceof HttpServletResponse) {
-                HttpServletResponse resp = (HttpServletResponse) response;
+            if (response instanceof HttpServletResponse resp) {
                 resp.setHeader("WWW-Authenticate", "");
                 resp.setHeader("Proxy-Authenticate", "");
-
-            if (response instanceof HttpServletResponse resp) {
-                resp.setHeader("WWW-Authenticate", null);
-                resp.setHeader("Proxy-Authenticate", null);
-
             }
         }
     }
