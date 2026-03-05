@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import tn.esprit.donation.entity.Donation;
 import tn.esprit.donation.entity.DonationStatus;
 import tn.esprit.donation.services.DonationService;
-import tn.esprit.donation.services.DonationStatsService;
 import tn.esprit.donation.entity.DonationReview;
 import tn.esprit.donation.entity.DonationFavorite;
 import tn.esprit.donation.entity.DonationComment;
@@ -29,12 +28,6 @@ import java.util.List;
 public class DonationController {
 
     private final DonationService donationService;
-    private final DonationStatsService donationStatsService;
-
-    @GetMapping("/stats")
-    public ResponseEntity<java.util.Map<String, Object>> getStats() {
-        return ResponseEntity.ok(donationStatsService.getStats());
-    }
 
     @PostMapping("/create-donation")
     public ResponseEntity<Donation> create(@Valid @RequestBody Donation donation) {

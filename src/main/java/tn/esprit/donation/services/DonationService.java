@@ -29,19 +29,24 @@ public class DonationService {
 
     public Donation create(Donation donation) {
         Donation savedDonation = donationRepository.save(donation);
+        System.out.println("[DEBUG] Donation created: id=" + savedDonation.getId() + ", userId=" + savedDonation.getUserId());
         
         // Award MERCI points on donation creation
         try {
             merciPointService.awardPoints(savedDonation);
+            System.out.println("[DEBUG] MERCI points awarded successfully");
         } catch (Exception e) {
             System.err.println("Failed to award merci points: " + e.getMessage());
+            e.printStackTrace();
         }
 
         // Send thank you email
         try {
+            System.out.println("[DEBUG] Sending thank you email...");
             emailService.sendDonationThankYouEmail(savedDonation);
         } catch (Exception e) {
             System.err.println("Failed to send thank you email: " + e.getMessage());
+            e.printStackTrace();
         }
         
         return savedDonation;

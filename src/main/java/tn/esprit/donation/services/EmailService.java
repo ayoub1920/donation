@@ -48,8 +48,9 @@ public class EmailService {
             emailSender.send(message);
             
             System.out.println("Thank you email sent to: " + userEmail);
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             System.err.println("Erreur lors de l'envoi de l'email: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -77,8 +78,9 @@ public class EmailService {
             emailSender.send(message);
 
             System.out.println("Merci points email sent to: " + userEmail + " (" + pointsEarned + " pts)");
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             System.err.println("Erreur lors de l'envoi de l'email merci points: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }
