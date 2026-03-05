@@ -21,6 +21,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/donations")
@@ -71,6 +72,11 @@ public class DonationController {
     public ResponseEntity<Donation> updateStatus(@PathVariable Long id,
                                                  @RequestParam("status") DonationStatus status) {
         return ResponseEntity.ok(donationService.updateStatus(id, status));
+    }
+
+    @GetMapping("/stats")
+    public ResponseEntity<Map<String, Object>> getStats() {
+        return ResponseEntity.ok(donationService.getStats());
     }
 
     @DeleteMapping("/delete-donation/{id}")

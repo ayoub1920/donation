@@ -12,8 +12,12 @@ import tn.esprit.donation.repository.DonationReviewRepository;
 import tn.esprit.donation.repository.DonationFavoriteRepository;
 import tn.esprit.donation.repository.DonationCommentRepository;
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+import tn.esprit.donation.entity.DonationType;
 
 @Service
 @RequiredArgsConstructor
@@ -174,5 +178,43 @@ public class DonationService {
 
     public List<Donation> getAll() {
         return donationRepository.findAll();
+    }
+
+    public Map<String, Object> getStats() {
+        Map<String, Object> stats = new HashMap<>();
+
+        // Total
+        stats.put("totalDonations", donationRepository.count());
+        stats.put("totalItems", donationRepository.sumTotalQuantity());
+
+        // By status
+        Map<String, Long> byStatus = new HashMap<>();
+        for (DonationStatus s : DonationStatus.values()) {
+            byStatus.put(s.name(), donationRepository.countByStatus(s));
+        }
+        stats.put("byStatus", byStatus);
+
+        // By type
+        Map<String, Long> byType = new HashMap<>();
+        for (DonationType t : DonationType.values()) {
+            byType.put(t.name(), donationRepository.countByType(t));
+        }
+        stats.put("byType", byType);
+
+        // Items by status
+        Map<String, Long> itemsByStatus = new HashMap<>();
+        for (DonationStatus s : DonationStatus.values()) {
+            itemsByStatus.put(s.name(), donationRepository.sumQuantityByStatus(s));
+        }
+        stats.put("itemsByStatus", itemsByStatus);
+
+        // By month
+        Map<String, Long> byMonth = new LinkedHashMap<>();
+        for (Object[] row : donationRepository.countByMonth()) {
+            byMonth.put((String) row[0], (Long) row[1]);
+        }
+        stats.put("byMonth", byMonth);
+
+        return stats;
     }
 }
