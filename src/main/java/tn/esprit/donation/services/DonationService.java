@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import tn.esprit.donation.entity.Donation;
 import tn.esprit.donation.entity.DonationStatus;
 import tn.esprit.donation.repository.DonationRepository;
+
 import tn.esprit.donation.repository.DonationReviewRepository;
 import tn.esprit.donation.entity.DonationReview;
 import tn.esprit.donation.repository.DonationFavoriteRepository;
@@ -12,6 +13,14 @@ import tn.esprit.donation.entity.DonationFavorite;
 import tn.esprit.donation.repository.DonationCommentRepository;
 import tn.esprit.donation.entity.DonationComment;
 import tn.esprit.donation.service.EmailService;
+
+import tn.esprit.donation.entity.DonationReview;
+import tn.esprit.donation.repository.DonationReviewRepository;
+import tn.esprit.donation.entity.DonationFavorite;
+import tn.esprit.donation.repository.DonationFavoriteRepository;
+import tn.esprit.donation.entity.DonationComment;
+import tn.esprit.donation.repository.DonationCommentRepository;
+
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,6 +33,7 @@ public class DonationService {
     private final DonationReviewRepository donationReviewRepository;
     private final DonationFavoriteRepository donationFavoriteRepository;
     private final DonationCommentRepository donationCommentRepository;
+
     private final EmailService emailService;
 
     public Donation create(Donation donation) {
@@ -37,6 +47,11 @@ public class DonationService {
         }
         
         return savedDonation;
+
+
+    public Donation create(Donation donation) {
+        return donationRepository.save(donation);
+
     }
 
     public Donation update(Long id, Donation donation) {

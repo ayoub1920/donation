@@ -67,11 +67,16 @@ public class DonationController {
         return ResponseEntity.ok(url);
     }
 
+
     @PostMapping("/update-status/{id}")
+
+    @PatchMapping("/update-status/{id}")
+
     public ResponseEntity<Donation> updateStatus(@PathVariable Long id,
                                                  @RequestParam("status") DonationStatus status) {
         return ResponseEntity.ok(donationService.updateStatus(id, status));
     }
+
 
     @PostMapping("/set-status/{id}")
     public ResponseEntity<String> setStatus(@PathVariable Long id,
@@ -89,6 +94,8 @@ public class DonationController {
     public ResponseEntity<String> test() {
         return ResponseEntity.ok("Server is working");
     }
+
+
 
     @DeleteMapping("/delete-donation/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
