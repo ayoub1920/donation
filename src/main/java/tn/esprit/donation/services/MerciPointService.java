@@ -29,7 +29,7 @@ public class MerciPointService {
                 .userId(donation.getUserId())
                 .donation(donation)
                 .points(points)
-                .reason("Don accepté : " + donation.getItemName() + " (x" + donation.getQuantity() + ")")
+                .reason("Don effectué : " + donation.getItemName() + " (x" + donation.getQuantity() + ")")
                 .build();
 
         MerciPoint saved = merciPointRepository.save(merciPoint);
