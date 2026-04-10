@@ -23,6 +23,10 @@ export class DonationService {
     return this.http.get<Donation>(`${this.apiUrl}/get-donation/${id}`);
   }
 
+  getQrCode(id: number): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/${id}/qrcode`, { responseType: 'blob' });
+  }
+
   update(id: number, donation: Donation): Observable<Donation> {
     return this.http.put<Donation>(`${this.apiUrl}/update-donation/${id}`, donation);
   }

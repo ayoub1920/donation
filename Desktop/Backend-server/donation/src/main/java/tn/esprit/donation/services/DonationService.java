@@ -4,17 +4,21 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import tn.esprit.donation.entity.Donation;
 import tn.esprit.donation.entity.DonationStatus;
+import tn.esprit.donation.entity.DonationReview;
+import tn.esprit.donation.entity.DonationFavorite;
+import tn.esprit.donation.entity.DonationComment;
 import tn.esprit.donation.repository.DonationRepository;
 import tn.esprit.donation.repository.DonationReviewRepository;
-import tn.esprit.donation.entity.DonationReview;
 import tn.esprit.donation.repository.DonationFavoriteRepository;
-import tn.esprit.donation.entity.DonationFavorite;
 import tn.esprit.donation.repository.DonationCommentRepository;
-import tn.esprit.donation.entity.DonationComment;
-import tn.esprit.donation.service.EmailService;
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+import tn.esprit.donation.entity.DonationType;
+import java.util.Base64;
 
 @Service
 @RequiredArgsConstructor
@@ -24,16 +28,47 @@ public class DonationService {
     private final DonationReviewRepository donationReviewRepository;
     private final DonationFavoriteRepository donationFavoriteRepository;
     private final DonationCommentRepository donationCommentRepository;
+
     private final EmailService emailService;
+    private final MerciPointService merciPointService;
+    private final QrCodeService qrCodeService;
 
     public Donation create(Donation donation) {
         Donation savedDonation = donationRepository.save(donation);
+        System.out.println("[DEBUG] Donation created: id=" + savedDonation.getId() + ", userId=" + savedDonation.getUserId());
+
+        // Generate QR code (Base64 PNG)
+        try {
+            String qrPayload = "{\"donationId\":" + savedDonation.getId()
+                    + ",\"type\":\"" + savedDonation.getType() + "\""
+                    + ",\"status\":\"" + savedDonation.getStatus() + "\""
+                    + ",\"date\":\"" + (savedDonation.getDonatedAt() != null ? savedDonation.getDonatedAt().toString() : "") + "\"}";
+
+            byte[] png = qrCodeService.generatePng(qrPayload, 240, 240);
+            String base64 = Base64.getEncoder().encodeToString(png);
+            savedDonation.setQrCode(base64);
+            savedDonation = donationRepository.save(savedDonation);
+        } catch (Exception e) {
+            System.err.println("Failed to generate QR code: " + e.getMessage());
+            e.printStackTrace();
+        }
         
+        // Award MERCI points on donation creation
+        try {
+            merciPointService.awardPoints(savedDonation);
+            System.out.println("[DEBUG] MERCI points awarded successfully");
+        } catch (Exception e) {
+            System.err.println("Failed to award merci points: " + e.getMessage());
+            e.printStackTrace();
+        }
+
         // Send thank you email
         try {
+            System.out.println("[DEBUG] Sending thank you email...");
             emailService.sendDonationThankYouEmail(savedDonation);
         } catch (Exception e) {
             System.err.println("Failed to send thank you email: " + e.getMessage());
+            e.printStackTrace();
         }
         
         return savedDonation;
@@ -147,8 +182,6 @@ public class DonationService {
         donationCommentRepository.deleteById(commentId);
     }
 
-
-
     public void delete(Long id) {
         if (!donationRepository.existsById(id)) {
             throw new RuntimeException("Donation not found with id: " + id);
@@ -161,7 +194,61 @@ public class DonationService {
                 .orElseThrow(() -> new RuntimeException("Donation not found with id: " + id));
     }
 
+    public byte[] getQrCodePng(Long id) {
+        Donation donation = getById(id);
+        if (donation.getQrCode() == null || donation.getQrCode().isBlank()) {
+            String qrPayload = "{\"donationId\":" + donation.getId()
+                    + ",\"type\":\"" + donation.getType() + "\""
+                    + ",\"status\":\"" + donation.getStatus() + "\""
+                    + ",\"date\":\"" + (donation.getDonatedAt() != null ? donation.getDonatedAt().toString() : "") + "\"}";
+
+            byte[] png = qrCodeService.generatePng(qrPayload, 240, 240);
+            donation.setQrCode(Base64.getEncoder().encodeToString(png));
+            donationRepository.save(donation);
+            return png;
+        }
+        return Base64.getDecoder().decode(donation.getQrCode());
+    }
+
     public List<Donation> getAll() {
         return donationRepository.findAll();
+    }
+
+    public Map<String, Object> getStats(Long userId) {
+        Map<String, Object> stats = new HashMap<>();
+
+        // Total
+        stats.put("totalDonations", donationRepository.countByUserId(userId));
+        stats.put("totalItems", donationRepository.sumTotalQuantityByUserId(userId));
+
+        // By status
+        Map<String, Long> byStatus = new HashMap<>();
+        for (DonationStatus s : DonationStatus.values()) {
+            byStatus.put(s.name(), donationRepository.countByUserIdAndStatus(userId, s));
+        }
+        stats.put("byStatus", byStatus);
+
+        // By type
+        Map<String, Long> byType = new HashMap<>();
+        for (DonationType t : DonationType.values()) {
+            byType.put(t.name(), donationRepository.countByUserIdAndType(userId, t));
+        }
+        stats.put("byType", byType);
+
+        // Items by status
+        Map<String, Long> itemsByStatus = new HashMap<>();
+        for (DonationStatus s : DonationStatus.values()) {
+            itemsByStatus.put(s.name(), donationRepository.sumQuantityByUserIdAndStatus(userId, s));
+        }
+        stats.put("itemsByStatus", itemsByStatus);
+
+        // By month
+        Map<String, Long> byMonth = new LinkedHashMap<>();
+        for (Object[] row : donationRepository.countByMonthAndUserId(userId)) {
+            byMonth.put((String) row[0], (Long) row[1]);
+        }
+        stats.put("byMonth", byMonth);
+
+        return stats;
     }
 }

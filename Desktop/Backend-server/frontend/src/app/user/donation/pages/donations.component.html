@@ -326,6 +326,14 @@
           >
             <span class="text-lg">👁</span>
           </button>
+
+          <button
+            (click)="openQrModal(donation)"
+            class="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-[#536471] hover:bg-[#f0f9ff] hover:text-[#38a9f3] hover:border-[#38a9f3] transition-colors"
+            title="QR Code"
+          >
+            <span class="text-lg">🔳</span>
+          </button>
           <button
             (click)="openEditModal(donation)"
             class="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-[#536471] hover:bg-[#f0f9ff] hover:text-[#38a9f3] hover:border-[#38a9f3] transition-colors"
@@ -448,7 +456,62 @@
     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
     Donate
   </button>
+
+  <button
+    (click)="openScanModal()"
+    class="ml-3 flex items-center gap-2 bg-[#0f1724] text-white text-sm font-semibold px-6 py-3 rounded-xl hover:bg-black transition-colors shadow-sm"
+  >
+    Scan QR Code
+  </button>
   </div>
+
+<!-- QR Code Modal -->
+@if (showQrModal) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="closeQrModal()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden">
+      <div class="p-5 border-b border-gray-200 flex items-center justify-between">
+        <h3 class="text-sm font-extrabold text-[#0f1724]">QR Code</h3>
+        <button (click)="closeQrModal()" class="text-[#536471] hover:text-[#0f1724]">✕</button>
+      </div>
+      <div class="p-6 flex items-center justify-center">
+        @if (qrImageUrl) {
+          <img [src]="qrImageUrl" alt="qr" class="w-56 h-56 object-contain" />
+        } @else {
+          <p class="text-xs text-[#94a3b8]">Chargement...</p>
+        }
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Scan QR Modal -->
+@if (showScanModal) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="closeScanModal()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
+      <div class="p-5 border-b border-gray-200 flex items-center justify-between">
+        <h3 class="text-sm font-extrabold text-[#0f1724]">Scan QR Code</h3>
+        <button (click)="closeScanModal()" class="text-[#536471] hover:text-[#0f1724]">✕</button>
+      </div>
+      <div class="p-6">
+        <div id="qr-scanner-region"></div>
+
+        @if (scanError) {
+          <p class="mt-3 text-xs text-red-500">{{ scanError }}</p>
+        }
+
+        @if (scannedDonation) {
+          <div class="mt-4 border border-gray-200 rounded-xl p-4">
+            <p class="text-sm font-bold text-[#0f1724]">Donation #{{ scannedDonation.id }}</p>
+            <p class="text-xs text-[#536471] mt-1">{{ scannedDonation.itemName }} · Qty: {{ scannedDonation.quantity }}</p>
+            <p class="text-xs text-[#94a3b8] mt-1">Status: {{ scannedDonation.status }} · Type: {{ scannedDonation.type }}</p>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}
 
 <!-- Donate Modal Overlay -->
 @if (showModal) {

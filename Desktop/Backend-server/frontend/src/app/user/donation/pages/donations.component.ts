@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Donation, DonationStatus, DonationType, ItemCondition } from '../models/donation.model';
 import { DonationService } from '../services/donation.service';
+import { Html5QrcodeScanner } from 'html5-qrcode';
 
 @Component({
   selector: 'app-donations',
@@ -37,6 +38,15 @@ export class DonationsComponent implements OnInit, OnDestroy {
   errorMessage: string | null = null;
   formSubmitted = false;
   formErrors: { itemName?: string; quantity?: string; description?: string } = {};
+
+  showQrModal = false;
+  qrDonationId: number | null = null;
+  qrImageUrl: string | null = null;
+
+  showScanModal = false;
+  private qrScanner: Html5QrcodeScanner | null = null;
+  scannedDonation: Donation | null = null;
+  scanError: string | null = null;
   formData: {
     type: DonationType;
     itemName: string;
@@ -79,6 +89,101 @@ export class DonationsComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     try { document.body.classList.remove('donations-bg'); } catch {}
+  }
+
+  openQrModal(donation: Donation): void {
+    if (!donation.id) return;
+    this.qrDonationId = donation.id;
+    this.qrImageUrl = null;
+    this.showQrModal = true;
+    this.donationService.getQrCode(donation.id).subscribe({
+      next: (blob) => {
+        this.qrImageUrl = URL.createObjectURL(blob);
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.qrImageUrl = null;
+      }
+    });
+  }
+
+  closeQrModal(): void {
+    this.showQrModal = false;
+    if (this.qrImageUrl) {
+      try { URL.revokeObjectURL(this.qrImageUrl); } catch {}
+    }
+    this.qrDonationId = null;
+    this.qrImageUrl = null;
+  }
+
+  openScanModal(): void {
+    this.showScanModal = true;
+    this.scannedDonation = null;
+    this.scanError = null;
+
+    setTimeout(() => {
+      try {
+        if (this.qrScanner) {
+          this.qrScanner.clear();
+          this.qrScanner = null;
+        }
+        this.qrScanner = new Html5QrcodeScanner(
+          'qr-scanner-region',
+          { fps: 10, qrbox: 250 },
+          false
+        );
+        this.qrScanner.render(
+          (decodedText: string) => this.onQrDecoded(decodedText),
+          () => {}
+        );
+      } catch (e: any) {
+        this.scanError = e?.message || 'Impossible de démarrer le scanner.';
+        this.cdr.markForCheck();
+      }
+    }, 0);
+  }
+
+  closeScanModal(): void {
+    this.showScanModal = false;
+    try {
+      this.qrScanner?.clear();
+    } catch {}
+    this.qrScanner = null;
+  }
+
+  private onQrDecoded(decodedText: string): void {
+    // Expected payload is JSON: { donationId, type, status, date }
+    let donationId: number | null = null;
+    try {
+      const obj = JSON.parse(decodedText);
+      donationId = Number(obj?.donationId);
+    } catch {
+      // fallback: allow plain number
+      const n = Number(decodedText);
+      donationId = Number.isFinite(n) ? n : null;
+    }
+
+    if (!donationId) {
+      this.scanError = 'QR Code invalide.';
+      this.cdr.markForCheck();
+      return;
+    }
+
+    try {
+      this.qrScanner?.clear();
+    } catch {}
+    this.qrScanner = null;
+
+    this.donationService.getById(donationId).subscribe({
+      next: (d) => {
+        this.scannedDonation = d;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.scanError = 'Donation introuvable.';
+        this.cdr.markForCheck();
+      }
+    });
   }
   loadDonations(): void {
     this.loading = true;

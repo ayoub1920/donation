@@ -56,6 +56,10 @@ public class Donation {
     @Column(name = "image_url")
     private String imageUrl;
 
+    @Lob
+    @Column(name = "qr_code", columnDefinition = "TEXT")
+    private String qrCode;
+
     @PrePersist
     void prePersistDefaults() {
         if (status == null) {

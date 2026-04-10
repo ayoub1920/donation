@@ -1,6 +1,8 @@
 package tn.esprit.donation.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import jakarta.validation.Valid;
@@ -21,6 +23,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/donations")
@@ -45,6 +48,14 @@ public class DonationController {
         return ResponseEntity.ok(donationService.getById(id));
     }
 
+    @GetMapping("/{id}/qrcode")
+    public ResponseEntity<byte[]> getQrCode(@PathVariable Long id) {
+        byte[] png = donationService.getQrCodePng(id);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_PNG_VALUE)
+                .body(png);
+    }
+
     @PutMapping("/update-donation/{id}")
     public ResponseEntity<Donation> update(@PathVariable Long id,
                                            @Valid @RequestBody Donation donation) {
@@ -67,27 +78,15 @@ public class DonationController {
         return ResponseEntity.ok(url);
     }
 
-    @PostMapping("/update-status/{id}")
+    @PatchMapping("/update-status/{id}")
     public ResponseEntity<Donation> updateStatus(@PathVariable Long id,
                                                  @RequestParam("status") DonationStatus status) {
         return ResponseEntity.ok(donationService.updateStatus(id, status));
     }
 
-    @PostMapping("/set-status/{id}")
-    public ResponseEntity<String> setStatus(@PathVariable Long id,
-                                           @RequestParam("status") String status) {
-        try {
-            DonationStatus donationStatus = DonationStatus.valueOf(status.toUpperCase());
-            donationService.updateStatus(id, donationStatus);
-            return ResponseEntity.ok("Status updated successfully");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Failed to update status: " + e.getMessage());
-        }
-    }
-
-    @GetMapping("/test")
-    public ResponseEntity<String> test() {
-        return ResponseEntity.ok("Server is working");
+    @GetMapping("/stats/{userId}")
+    public ResponseEntity<Map<String, Object>> getStats(@PathVariable Long userId) {
+        return ResponseEntity.ok(donationService.getStats(userId));
     }
 
     @DeleteMapping("/delete-donation/{id}")

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Points MERCI</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+        }
+        .content {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .points-badge {
+            background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
+            color: white;
+            font-size: 48px;
+            font-weight: bold;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px auto;
+            box-shadow: 0 4px 15px rgba(247, 151, 30, 0.4);
+        }
+        .points-label {
+            text-align: center;
+            font-size: 18px;
+            color: #f7971e;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .total-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #ffd200;
+            margin: 20px 0;
+        }
+        .total-points {
+            font-size: 32px;
+            font-weight: bold;
+            color: #f7971e;
+        }
+        .donation-info {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #ffd200;
+            margin: 15px 0;
+        }
+        .footer {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏆 Félicitations !</h1>
+        <p>Votre don a été accepté</p>
+    </div>
+
+    <div class="content">
+        <div style="text-align: center;">
+            <div class="points-badge">
+                <span th:text="${pointsEarned}">10</span>
+            </div>
+            <div class="points-label">Points MERCI gagnés !</div>
+        </div>
+
+        <div class="donation-info">
+            <h4>📦 Don accepté</h4>
+            <p><strong>Article :</strong> <span th:text="${itemName}">Nom</span></p>
+            <p><strong>Quantité :</strong> <span th:text="${quantity}">1</span></p>
+        </div>
+
+        <div class="total-box">
+            <p>Votre solde total</p>
+            <div class="total-points"><span th:text="${totalPoints}">50</span> points MERCI</div>
+        </div>
+
+        <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; margin-top: 20px;">
+            <h4>💡 À quoi servent les points MERCI ?</h4>
+            <p>Vos points MERCI récompensent votre générosité. Plus vous donnez, plus vous accumulez de points et montez dans le classement des donateurs !</p>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Cordialement,<br>L'équipe Minolingo</p>
+        <p style="font-size: 12px; margin-top: 10px;">
+            Cet email a été envoyé automatiquement. Merci de ne pas répondre à cette adresse.
+        </p>
+    </div>
+</body>
+</html>
