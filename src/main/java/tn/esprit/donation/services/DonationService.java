@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import tn.esprit.donation.entity.DonationType;
+import java.util.Base64;
 
 @Service
 @RequiredArgsConstructor
@@ -30,10 +31,27 @@ public class DonationService {
 
     private final EmailService emailService;
     private final MerciPointService merciPointService;
+    private final QrCodeService qrCodeService;
 
     public Donation create(Donation donation) {
         Donation savedDonation = donationRepository.save(donation);
         System.out.println("[DEBUG] Donation created: id=" + savedDonation.getId() + ", userId=" + savedDonation.getUserId());
+
+        // Generate QR code (Base64 PNG)
+        try {
+            String qrPayload = "{\"donationId\":" + savedDonation.getId()
+                    + ",\"type\":\"" + savedDonation.getType() + "\""
+                    + ",\"status\":\"" + savedDonation.getStatus() + "\""
+                    + ",\"date\":\"" + (savedDonation.getDonatedAt() != null ? savedDonation.getDonatedAt().toString() : "") + "\"}";
+
+            byte[] png = qrCodeService.generatePng(qrPayload, 240, 240);
+            String base64 = Base64.getEncoder().encodeToString(png);
+            savedDonation.setQrCode(base64);
+            savedDonation = donationRepository.save(savedDonation);
+        } catch (Exception e) {
+            System.err.println("Failed to generate QR code: " + e.getMessage());
+            e.printStackTrace();
+        }
         
         // Award MERCI points on donation creation
         try {
@@ -174,6 +192,22 @@ public class DonationService {
     public Donation getById(Long id) {
         return donationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Donation not found with id: " + id));
+    }
+
+    public byte[] getQrCodePng(Long id) {
+        Donation donation = getById(id);
+        if (donation.getQrCode() == null || donation.getQrCode().isBlank()) {
+            String qrPayload = "{\"donationId\":" + donation.getId()
+                    + ",\"type\":\"" + donation.getType() + "\""
+                    + ",\"status\":\"" + donation.getStatus() + "\""
+                    + ",\"date\":\"" + (donation.getDonatedAt() != null ? donation.getDonatedAt().toString() : "") + "\"}";
+
+            byte[] png = qrCodeService.generatePng(qrPayload, 240, 240);
+            donation.setQrCode(Base64.getEncoder().encodeToString(png));
+            donationRepository.save(donation);
+            return png;
+        }
+        return Base64.getDecoder().decode(donation.getQrCode());
     }
 
     public List<Donation> getAll() {

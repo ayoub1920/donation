@@ -1,6 +1,8 @@
 package tn.esprit.donation.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import jakarta.validation.Valid;
@@ -44,6 +46,14 @@ public class DonationController {
     @GetMapping("/get-donation/{id}")
     public ResponseEntity<Donation> getById(@PathVariable Long id) {
         return ResponseEntity.ok(donationService.getById(id));
+    }
+
+    @GetMapping("/{id}/qrcode")
+    public ResponseEntity<byte[]> getQrCode(@PathVariable Long id) {
+        byte[] png = donationService.getQrCodePng(id);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_PNG_VALUE)
+                .body(png);
     }
 
     @PutMapping("/update-donation/{id}")
