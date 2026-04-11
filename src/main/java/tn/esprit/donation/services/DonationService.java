@@ -19,6 +19,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import tn.esprit.donation.entity.DonationType;
 import java.util.Base64;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +34,6 @@ public class DonationService {
     private final EmailService emailService;
     private final MerciPointService merciPointService;
     private final QrCodeService qrCodeService;
-    private final GamificationService gamificationService;
 
     public Donation create(Donation donation) {
         Donation savedDonation = donationRepository.save(donation);
@@ -60,14 +61,6 @@ public class DonationService {
             System.out.println("[DEBUG] MERCI points awarded successfully");
         } catch (Exception e) {
             System.err.println("Failed to award merci points: " + e.getMessage());
-            e.printStackTrace();
-        }
-
-        // Gamification: +10 points per donation
-        try {
-            gamificationService.onDonationCreated(savedDonation);
-        } catch (Exception e) {
-            System.err.println("Failed to update gamification on donation creation: " + e.getMessage());
             e.printStackTrace();
         }
 
@@ -103,21 +96,7 @@ public class DonationService {
         Donation existing = donationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Donation not found with id: " + id));
         existing.setStatus(status);
-        Donation saved = donationRepository.save(existing);
-
-        // Gamification: +20 points once when donation is accepted
-        if (status == DonationStatus.ACCEPTED && (saved.getAcceptedBonusAwarded() == null || !saved.getAcceptedBonusAwarded())) {
-            try {
-                gamificationService.onDonationAccepted(saved);
-                saved.setAcceptedBonusAwarded(Boolean.TRUE);
-                saved = donationRepository.save(saved);
-            } catch (Exception e) {
-                System.err.println("Failed to update gamification on donation accepted: " + e.getMessage());
-                e.printStackTrace();
-            }
-        }
-
-        return saved;
+        return donationRepository.save(existing);
     }
 
     public DonationReview reviewDonation(Long id, Long moderatorId, DonationStatus decision, String reason) {
@@ -137,22 +116,10 @@ public class DonationService {
         }
 
         donation.setStatus(decision);
-        Donation savedDonation = donationRepository.save(donation);
-
-        // Gamification: +20 points once when donation is accepted
-        if (decision == DonationStatus.ACCEPTED && (savedDonation.getAcceptedBonusAwarded() == null || !savedDonation.getAcceptedBonusAwarded())) {
-            try {
-                gamificationService.onDonationAccepted(savedDonation);
-                savedDonation.setAcceptedBonusAwarded(Boolean.TRUE);
-                savedDonation = donationRepository.save(savedDonation);
-            } catch (Exception e) {
-                System.err.println("Failed to update gamification on donation accepted (review): " + e.getMessage());
-                e.printStackTrace();
-            }
-        }
+        donationRepository.save(donation);
 
         DonationReview review = DonationReview.builder()
-                .donation(savedDonation)
+                .donation(donation)
                 .moderatorId(moderatorId)
                 .decision(decision)
                 .reason(reason)
@@ -226,7 +193,7 @@ public class DonationService {
 
     public Donation getById(Long id) {
         return donationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Donation not found with id: " + id));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Donation not found with id: " + id));
     }
 
     public byte[] getQrCodePng(Long id) {
@@ -242,7 +209,20 @@ public class DonationService {
             donationRepository.save(donation);
             return png;
         }
-        return Base64.getDecoder().decode(donation.getQrCode());
+        try {
+            return Base64.getDecoder().decode(donation.getQrCode());
+        } catch (IllegalArgumentException ex) {
+            // Stored QR is corrupted / not Base64 => regenerate
+            String qrPayload = "{\"donationId\":" + donation.getId()
+                    + ",\"type\":\"" + donation.getType() + "\""
+                    + ",\"status\":\"" + donation.getStatus() + "\""
+                    + ",\"date\":\"" + (donation.getDonatedAt() != null ? donation.getDonatedAt().toString() : "") + "\"}";
+
+            byte[] png = qrCodeService.generatePng(qrPayload, 240, 240);
+            donation.setQrCode(Base64.getEncoder().encodeToString(png));
+            donationRepository.save(donation);
+            return png;
+        }
     }
 
     public List<Donation> getAll() {
