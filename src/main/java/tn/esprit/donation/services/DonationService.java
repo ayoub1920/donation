@@ -32,6 +32,7 @@ public class DonationService {
     private final EmailService emailService;
     private final MerciPointService merciPointService;
     private final QrCodeService qrCodeService;
+    private final GamificationService gamificationService;
 
     public Donation create(Donation donation) {
         Donation savedDonation = donationRepository.save(donation);
@@ -59,6 +60,14 @@ public class DonationService {
             System.out.println("[DEBUG] MERCI points awarded successfully");
         } catch (Exception e) {
             System.err.println("Failed to award merci points: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        // Gamification: +10 points per donation
+        try {
+            gamificationService.onDonationCreated(savedDonation);
+        } catch (Exception e) {
+            System.err.println("Failed to update gamification on donation creation: " + e.getMessage());
             e.printStackTrace();
         }
 
@@ -94,7 +103,21 @@ public class DonationService {
         Donation existing = donationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Donation not found with id: " + id));
         existing.setStatus(status);
-        return donationRepository.save(existing);
+        Donation saved = donationRepository.save(existing);
+
+        // Gamification: +20 points once when donation is accepted
+        if (status == DonationStatus.ACCEPTED && (saved.getAcceptedBonusAwarded() == null || !saved.getAcceptedBonusAwarded())) {
+            try {
+                gamificationService.onDonationAccepted(saved);
+                saved.setAcceptedBonusAwarded(Boolean.TRUE);
+                saved = donationRepository.save(saved);
+            } catch (Exception e) {
+                System.err.println("Failed to update gamification on donation accepted: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+
+        return saved;
     }
 
     public DonationReview reviewDonation(Long id, Long moderatorId, DonationStatus decision, String reason) {
@@ -114,10 +137,22 @@ public class DonationService {
         }
 
         donation.setStatus(decision);
-        donationRepository.save(donation);
+        Donation savedDonation = donationRepository.save(donation);
+
+        // Gamification: +20 points once when donation is accepted
+        if (decision == DonationStatus.ACCEPTED && (savedDonation.getAcceptedBonusAwarded() == null || !savedDonation.getAcceptedBonusAwarded())) {
+            try {
+                gamificationService.onDonationAccepted(savedDonation);
+                savedDonation.setAcceptedBonusAwarded(Boolean.TRUE);
+                savedDonation = donationRepository.save(savedDonation);
+            } catch (Exception e) {
+                System.err.println("Failed to update gamification on donation accepted (review): " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
 
         DonationReview review = DonationReview.builder()
-                .donation(donation)
+                .donation(savedDonation)
                 .moderatorId(moderatorId)
                 .decision(decision)
                 .reason(reason)

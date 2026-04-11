@@ -60,6 +60,10 @@ public class Donation {
     @Column(name = "qr_code", columnDefinition = "TEXT")
     private String qrCode;
 
+    @Column(name = "accepted_bonus_awarded")
+    @Builder.Default
+    private Boolean acceptedBonusAwarded = Boolean.FALSE;
+
     @PrePersist
     void prePersistDefaults() {
         if (status == null) {
@@ -70,6 +74,9 @@ public class Donation {
         }
         if (anonymous == null) {
             anonymous = Boolean.FALSE;
+        }
+        if (acceptedBonusAwarded == null) {
+            acceptedBonusAwarded = Boolean.FALSE;
         }
     }
 }
