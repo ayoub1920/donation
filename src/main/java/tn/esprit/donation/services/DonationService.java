@@ -19,8 +19,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import tn.esprit.donation.entity.DonationType;
 import java.util.Base64;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
@@ -193,7 +191,7 @@ public class DonationService {
 
     public Donation getById(Long id) {
         return donationRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Donation not found with id: " + id));
+                .orElseThrow(() -> new RuntimeException("Donation not found with id: " + id));
     }
 
     public byte[] getQrCodePng(Long id) {
@@ -209,20 +207,7 @@ public class DonationService {
             donationRepository.save(donation);
             return png;
         }
-        try {
-            return Base64.getDecoder().decode(donation.getQrCode());
-        } catch (IllegalArgumentException ex) {
-            // Stored QR is corrupted / not Base64 => regenerate
-            String qrPayload = "{\"donationId\":" + donation.getId()
-                    + ",\"type\":\"" + donation.getType() + "\""
-                    + ",\"status\":\"" + donation.getStatus() + "\""
-                    + ",\"date\":\"" + (donation.getDonatedAt() != null ? donation.getDonatedAt().toString() : "") + "\"}";
-
-            byte[] png = qrCodeService.generatePng(qrPayload, 240, 240);
-            donation.setQrCode(Base64.getEncoder().encodeToString(png));
-            donationRepository.save(donation);
-            return png;
-        }
+        return Base64.getDecoder().decode(donation.getQrCode());
     }
 
     public List<Donation> getAll() {
