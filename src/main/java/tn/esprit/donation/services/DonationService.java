@@ -32,6 +32,7 @@ public class DonationService {
     private final EmailService emailService;
     private final MerciPointService merciPointService;
     private final QrCodeService qrCodeService;
+    private final GamificationService gamificationService;
 
     public Donation create(Donation donation) {
         Donation savedDonation = donationRepository.save(donation);
@@ -113,8 +114,19 @@ public class DonationService {
             }
         }
 
+        boolean wasNotAccepted = donation.getStatus() != DonationStatus.ACCEPTED;
         donation.setStatus(decision);
         donationRepository.save(donation);
+
+        // Award +20 bonus points when a donation is accepted for the first time
+        if (decision == DonationStatus.ACCEPTED && wasNotAccepted) {
+            try {
+                gamificationService.addPoints(donation.getUserId(), 20, "Don accepté");
+                gamificationService.awardAcceptedBadge(donation.getUserId());
+            } catch (Exception e) {
+                System.err.println("Failed to award acceptance gamification points: " + e.getMessage());
+            }
+        }
 
         DonationReview review = DonationReview.builder()
                 .donation(donation)

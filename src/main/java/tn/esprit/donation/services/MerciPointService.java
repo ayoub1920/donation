@@ -14,6 +14,7 @@ public class MerciPointService {
 
     private final MerciPointRepository merciPointRepository;
     private final EmailService emailService;
+    private final GamificationService gamificationService;
 
     private static final int POINTS_PER_DONATION = 10;
 
@@ -33,6 +34,13 @@ public class MerciPointService {
                 .build();
 
         MerciPoint saved = merciPointRepository.save(merciPoint);
+
+        // Sync points to gamification profile (+10 per donation)
+        try {
+            gamificationService.addPoints(donation.getUserId(), points, "Don effectué");
+        } catch (Exception e) {
+            System.err.println("Failed to update gamification: " + e.getMessage());
+        }
 
         // Send email notification about points earned
         try {
