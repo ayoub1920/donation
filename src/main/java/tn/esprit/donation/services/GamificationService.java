@@ -41,6 +41,7 @@ public class GamificationService {
         return getOrCreate(userId);
     }
 
+    @Transactional
     public Map<String, Object> getGamificationResponse(Long userId) {
         UserGamification gami = getGamification(userId);
         int next = nextLevelThreshold(gami.getPoints());
