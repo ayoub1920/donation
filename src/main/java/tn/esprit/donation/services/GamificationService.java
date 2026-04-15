@@ -3,6 +3,7 @@ package tn.esprit.donation.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tn.esprit.donation.entity.DonationActivityType;
 import tn.esprit.donation.entity.UserGamification;
 import tn.esprit.donation.repository.DonationRepository;
 import tn.esprit.donation.repository.UserGamificationRepository;
@@ -15,6 +16,7 @@ public class GamificationService {
 
     private final UserGamificationRepository gamificationRepository;
     private final DonationRepository donationRepository;
+    private final DonationActivityService activityService;
 
     // Level thresholds
     private static final int ACTIVE_MIN    = 101;
@@ -31,10 +33,23 @@ public class GamificationService {
     @Transactional
     public UserGamification addPoints(Long userId, int points, String reason) {
         UserGamification gami = getOrCreate(userId);
+        String oldLevel = gami.getLevel();
         gami.setPoints(gami.getPoints() + points);
         gami.setLevel(calculateLevel(gami.getPoints()));
         checkAndAwardBadges(gami);
-        return gamificationRepository.save(gami);
+        UserGamification saved = gamificationRepository.save(gami);
+
+        // Log points earned
+        activityService.log(userId, DonationActivityType.POINTS_GAGNES,
+                "+" + points + " points — " + reason, null, points);
+
+        // Log level change if upgraded
+        if (!gami.getLevel().equals(oldLevel)) {
+            activityService.log(userId, DonationActivityType.NIVEAU_ATTEINT,
+                    "Nouveau niveau atteint : " + gami.getLevel(), null, 0);
+        }
+
+        return saved;
     }
 
     public UserGamification getGamification(Long userId) {
@@ -96,6 +111,8 @@ public class GamificationService {
     private void awardIf(UserGamification gami, String badge, boolean condition) {
         if (condition && !gami.getBadges().contains(badge)) {
             gami.getBadges().add(badge);
+            activityService.log(gami.getUserId(), DonationActivityType.BADGE_DEBLOQUE,
+                    "Badge débloqué : " + badge, null, 0);
         }
     }
 
