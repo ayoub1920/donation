@@ -3,7 +3,6 @@ package tn.esprit.donation.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import tn.esprit.donation.entity.Donation;
-import tn.esprit.donation.entity.DonationActivityType;
 import tn.esprit.donation.entity.DonationStatus;
 import tn.esprit.donation.entity.DonationReview;
 import tn.esprit.donation.entity.DonationFavorite;
@@ -34,7 +33,6 @@ public class DonationService {
     private final MerciPointService merciPointService;
     private final QrCodeService qrCodeService;
     private final GamificationService gamificationService;
-    private final DonationActivityService activityService;
 
     public Donation create(Donation donation) {
         Donation savedDonation = donationRepository.save(donation);
@@ -56,15 +54,6 @@ public class DonationService {
             e.printStackTrace();
         }
         
-        // Log donation creation activity
-        try {
-            activityService.log(savedDonation.getUserId(), DonationActivityType.DON_CREE,
-                    "Don créé : " + savedDonation.getItemName() + " (x" + savedDonation.getQuantity() + ")",
-                    savedDonation.getId(), 0);
-        } catch (Exception e) {
-            System.err.println("Failed to log donation activity: " + e.getMessage());
-        }
-
         // Award MERCI points on donation creation
         try {
             merciPointService.awardPoints(savedDonation);
@@ -128,19 +117,6 @@ public class DonationService {
         boolean wasNotAccepted = donation.getStatus() != DonationStatus.ACCEPTED;
         donation.setStatus(decision);
         donationRepository.save(donation);
-
-        // Log review activity (accepted or rejected)
-        try {
-            if (decision == DonationStatus.ACCEPTED) {
-                activityService.log(donation.getUserId(), DonationActivityType.DON_ACCEPTE,
-                        "Don accepté : " + donation.getItemName(), donation.getId(), 0);
-            } else if (decision == DonationStatus.REJECTED) {
-                activityService.log(donation.getUserId(), DonationActivityType.DON_REJETE,
-                        "Don rejeté : " + donation.getItemName(), donation.getId(), 0);
-            }
-        } catch (Exception e) {
-            System.err.println("Failed to log review activity: " + e.getMessage());
-        }
 
         // Award +20 bonus points when a donation is accepted for the first time
         if (decision == DonationStatus.ACCEPTED && wasNotAccepted) {
