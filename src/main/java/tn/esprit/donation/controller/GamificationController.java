@@ -8,7 +8,7 @@ import tn.esprit.donation.services.GamificationService;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/donations")
 @RequiredArgsConstructor
 public class GamificationController {
 

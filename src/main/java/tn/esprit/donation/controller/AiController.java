@@ -7,7 +7,7 @@ import tn.esprit.donation.controller.dto.*;
 import tn.esprit.donation.services.AiService;
 
 @RestController
-@RequestMapping("/api/donation/ai")
+@RequestMapping("/api/donations/ai")
 @RequiredArgsConstructor
 public class AiController {
 
