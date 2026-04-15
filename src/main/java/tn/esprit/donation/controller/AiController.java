@@ -8,7 +8,6 @@ import tn.esprit.donation.services.AiService;
 
 @RestController
 @RequestMapping("/api/ai")
-@CrossOrigin
 @RequiredArgsConstructor
 public class AiController {
 
