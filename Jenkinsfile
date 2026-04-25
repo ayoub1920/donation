@@ -5,6 +5,12 @@ pipeline {
         maven 'Maven 3.9'
     }
 
+    environment {
+        SPRING_DATASOURCE_URL = 'jdbc:postgresql://postgres:5432/donation'
+        SPRING_DATASOURCE_USERNAME = 'postgres'
+        SPRING_DATASOURCE_PASSWORD = 'postgres'
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -15,7 +21,7 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'mvn clean compile'
+                sh 'mvn clean compile -DskipTests'
             }
         }
 
