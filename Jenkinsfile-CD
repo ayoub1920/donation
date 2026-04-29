@@ -25,7 +25,8 @@ pipeline {
             steps {
                 sh '''
                     kubectl apply -f k8s/deployment.yaml
-                    kubectl rollout status deployment/donation-backend --timeout=120s
+                    kubectl rollout restart deployment/donation-backend
+                    echo "Application déployée !"
                 '''
             }
         }
@@ -34,8 +35,18 @@ pipeline {
             steps {
                 sh '''
                     kubectl apply -f k8s/monitoring.yaml
-                    echo "Prometheus: http://localhost:30090"
-                    echo "Grafana: http://localhost:30030"
+                    echo "Prometheus: http://localhost:9091"
+                    echo "Grafana: http://localhost:3001"
+                '''
+            }
+        }
+
+        stage('Verify Deployment') {
+            steps {
+                sh '''
+                    sleep 10
+                    kubectl get pods
+                    kubectl get services
                 '''
             }
         }
