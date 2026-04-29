@@ -44,31 +44,5 @@ pipeline {
                 }
             }
         }
-
-        stage('Build Docker Image') {
-            steps {
-                sh 'docker build -t donation-backend:latest .'
-            }
-        }
-
-        stage('Deploy to Kubernetes') {
-            steps {
-                sh '''
-                    kubectl apply -f k8s/postgres.yaml
-                    kubectl apply -f k8s/deployment.yaml
-                    kubectl apply -f k8s/monitoring.yaml
-                    kubectl rollout status deployment/donation-backend --timeout=120s
-                '''
-            }
-        }
-    }
-
-    post {
-        success {
-            echo 'Pipeline CD terminé avec succès !'
-        }
-        failure {
-            echo 'Pipeline échoué !'
-        }
     }
 }
