@@ -1,0 +1,52 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/ayoub1920/donation.git'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t donation-backend:latest .'
+            }
+        }
+
+        stage('Deploy PostgreSQL') {
+            steps {
+                sh 'kubectl apply -f k8s/postgres.yaml'
+            }
+        }
+
+        stage('Deploy Application') {
+            steps {
+                sh '''
+                    kubectl apply -f k8s/deployment.yaml
+                    kubectl rollout status deployment/donation-backend --timeout=120s
+                '''
+            }
+        }
+
+        stage('Deploy Monitoring') {
+            steps {
+                sh '''
+                    kubectl apply -f k8s/monitoring.yaml
+                    echo "Prometheus: http://localhost:30090"
+                    echo "Grafana: http://localhost:30030"
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Déploiement CD terminé avec succès !'
+        }
+        failure {
+            echo 'Déploiement échoué !'
+        }
+    }
+}
