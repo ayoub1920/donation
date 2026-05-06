@@ -31,6 +31,10 @@ spec:
           value: "*"
         - name: MANAGEMENT_ENDPOINT_PROMETHEUS_ENABLED
           value: "true"
+        - name: MANAGEMENT_ENDPOINTS_ENABLED_BY_DEFAULT
+          value: "true"
+        - name: MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS
+          value: "always"
         - name: EUREKA_CLIENT_ENABLED
           value: "false"
         - name: EUREKA_CLIENT_REGISTER_WITH_EUREKA
