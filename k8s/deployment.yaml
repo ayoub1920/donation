@@ -27,6 +27,16 @@ spec:
           value: postgres
         - name: SPRING_DATASOURCE_PASSWORD
           value: postgres
+        - name: MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE
+          value: "*"
+        - name: MANAGEMENT_ENDPOINT_PROMETHEUS_ENABLED
+          value: "true"
+        - name: EUREKA_CLIENT_ENABLED
+          value: "false"
+        - name: EUREKA_CLIENT_REGISTER_WITH_EUREKA
+          value: "false"
+        - name: EUREKA_CLIENT_FETCH_REGISTRY
+          value: "false"
 ---
 apiVersion: v1
 kind: Service
