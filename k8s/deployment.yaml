@@ -17,9 +17,9 @@ spec:
       containers:
       - name: donation-backend
         image: donation-backend:latest
-        imagePullPolicy: Never
+        imagePullPolicy: IfNotPresent
         ports:
-        - containerPort: 8080
+        - containerPort: 8084
         env:
         - name: SPRING_DATASOURCE_URL
           value: jdbc:postgresql://postgres-service:5432/donation
@@ -36,7 +36,7 @@ spec:
   selector:
     app: donation-backend
   ports:
-  - port: 8080
-    targetPort: 8080
-    nodePort: 30080
+  - port: 8084
+    targetPort: 8084
+    nodePort: 30084
   type: NodePort
