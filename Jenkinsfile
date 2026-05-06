@@ -19,20 +19,24 @@ pipeline {
             }
         }
 
-        stage('Test') {
-            steps {
-                sh '''mvn test \
-                  -Dspring.datasource.url=jdbc:h2:mem:testdb \
-                  -Dspring.datasource.driver-class-name=org.h2.Driver \
-                  -Dspring.datasource.username=sa \
-                  -Dspring.datasource.password= \
-                  -Dspring.jpa.database-platform=org.hibernate.dialect.H2Dialect \
-                  -Dspring.jpa.hibernate.ddl-auto=create-drop \
-                  -Deureka.client.enabled=false \
-                  -Dspring.cloud.discovery.enabled=false \
-                  -Dspring.autoconfigure.exclude=org.springframework.boot.autoconfigure.mail.MailSenderAutoConfiguration'''
-            }
-        }
+       stage('Test') {
+    steps {
+        sh '''mvn test \
+          -Dspring.datasource.url=jdbc:h2:mem:testdb \
+          -Dspring.datasource.driver-class-name=org.h2.Driver \
+          -Dspring.datasource.username=sa \
+          -Dspring.datasource.password= \
+          -Dspring.jpa.database-platform=org.hibernate.dialect.H2Dialect \
+          -Dspring.jpa.hibernate.ddl-auto=create-drop \
+          -Deureka.client.enabled=false \
+          -Deureka.client.register-with-eureka=false \
+          -Deureka.client.fetch-registry=false \
+          -Dspring.cloud.discovery.enabled=false \
+          -Dspring.main.lazy-initialization=true \
+          -Dmanagement.metrics.export.prometheus.enabled=false \
+          -Dspring.autoconfigure.exclude=org.springframework.boot.autoconfigure.mail.MailSenderAutoConfiguration'''
+    }
+}
 
         stage('SonarQube Analysis') {
             steps {
