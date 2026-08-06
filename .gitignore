@@ -1,0 +1,84 @@
+# This repository's working tree is the whole home directory (C:\Users\ayoub),
+# and its remote is public: https://github.com/ayoub1920/donation.git
+#
+# So this file is an ALLOWLIST, not a denylist. Everything is ignored by
+# default and only the project folders this repo actually tracks are let back
+# in. A denylist cannot work here: every new tool drops a new dot-directory
+# into the home folder (.aws, .kube, .docker, .gnupg, .claude.json, .cagent,
+# .codeium, .antigravity ...), and one `git add .` before you notice would
+# publish credentials that cannot be un-published.
+#
+# Note: this does not untrack anything. Git ignores only untracked files, so
+# every file already committed is unaffected.
+#
+# ---------------------------------------------------------------------------
+# TO ADD A NEW PROJECT: add a `!` line for it below, next to its siblings.
+# Until you do, `git add <path>` will refuse it and tell you to use -f.
+# Prefer giving the project its own repository instead — as was done for
+# Desktop/Frontend_Rakeb (github.com/ayoub1920/Rakeb).
+# ---------------------------------------------------------------------------
+
+# 1. Ignore every entry at the root of the home directory.
+/*
+
+# ...except this file, so it stays visible and committable.
+!/.gitignore
+
+# 2. Re-include only the two folders that hold tracked projects.
+!/Desktop/
+!/Documents/
+
+# 3. Inside them, ignore everything except the tracked projects themselves.
+/Desktop/*
+!/Desktop/Backend-server/
+!/Desktop/premierapp/
+!/Desktop/sqldeveloper/
+!/Desktop/web projet/
+
+/Documents/*
+!/Documents/integration_ayoub_taha_khadija/
+!/Documents/integrationn/
+!/Documents/interface/
+!/Documents/interface1/
+!/Documents/lesinterfaces/
+!/Documents/menu/
+
+# ---------------------------------------------------------------------------
+# Defence in depth: these apply inside the allowed project folders too, where
+# secrets and build output are just as likely to appear.
+# ---------------------------------------------------------------------------
+
+# Credentials and keys
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+id_rsa*
+id_ed25519*
+*credentials*.json
+serviceAccount*.json
+
+# Dependencies and build output
+node_modules/
+target/
+dist/
+build/
+out/
+.gradle/
+.angular/
+.expo/
+__pycache__/
+*.class
+
+# Local tooling and editor state
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+*.log
